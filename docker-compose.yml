@@ -1,0 +1,22 @@
+version: '3'
+
+networks:
+  nettools_net:
+    ipam:
+      config:
+        - subnet: 172.109.0.0/24
+
+services:
+  tools:
+    image: nettools
+    build:
+      context: .
+      dockerfile: ./dockerimage/nettools.dockerfile
+    restart: always
+    volumes: 
+    - ./logs/nettools.txt:/usr/src/app/logs.txt
+    ports:
+    - "9898:5050"
+    networks:
+      nettools_net:
+        ipv4_address: 172.109.0.10
