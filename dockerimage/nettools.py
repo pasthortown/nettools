@@ -2,12 +2,21 @@ import os
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler
 from tornado.escape import json_decode
-from pythonping import ping
-from scapy.all import traceroute
+from ping3 import ping
 import logging
+import subprocess
+from pymongo import MongoClient
+import json
+from bson import json_util
 
-app_secret = os.getenv('app_secret')
-allowed_app_name = os.getenv('allowed_app_name')
+mongo_bdd = os.getenv('mongo_bdd')
+mongo_bdd_server = os.getenv('mongo_bdd_server')
+mongo_user = os.getenv('mongo_user')
+mongo_password = os.getenv('mongo_password')
+
+database_uri='mongodb://'+mongo_user+':'+mongo_password+'@'+ mongo_bdd_server +'/'
+client = MongoClient(database_uri)
+db = client[mongo_bdd]
 
 logging.basicConfig(filename='logs.txt', level=logging.DEBUG)
 
@@ -38,7 +47,9 @@ class ActionHandler(RequestHandler):
         try:
             if (action == 'ping'):
                 target = content['target']
-                respuesta = ping(target)
+                respuesta = do_ping(target)
+            if (action == 'get_pings'):
+                respuesta = get_pings()
             if (action == 'tracert'):
                 target = content['target']
                 respuesta = tracert(target)
@@ -47,19 +58,29 @@ class ActionHandler(RequestHandler):
         self.write(respuesta)
         return
 
-def ping(target):
+def get_pings():
+    collection = db['pings']
+    toReturn = json.loads(json_util.dumps(collection.find({})))
+    return {'response':toReturn, 'status':200}
+
+def do_ping(target):
+    collection = db['pings']
     try:
-        toReturn = str(ping(target))
+        response = ping(target, timeout=2)
+        if response is None:
+            response = False
+        toReturn = str(response)
     except Exception as e:
         toReturn = "No se pudo hacer ping a " + str(target)
         write_log(str(e))
+    collection.insert_one({'target':target, 'result':toReturn})
     return {'response':toReturn, 'status':200}
 
 def tracert(target):
     try:
-        respuesta, no_respuesta = traceroute(target)
-        toReturn = str(respuesta)
-        write_log(str(respuesta))
+        command = ['traceroute', '-n', target]
+        output = subprocess.run(command, capture_output=True, text=True)
+        toReturn = output.stdout.strip()
     except Exception as e:
         toReturn = "No se pudo realizar el trazado de ruta a " + str(target)
         write_log(str(e))

@@ -7,16 +7,67 @@ networks:
         - subnet: 172.109.0.0/24
 
 services:
-  tools:
+  worker_1:
     image: nettools
     build:
       context: .
       dockerfile: ./dockerimage/nettools.dockerfile
     restart: always
+    env_file:
+    - ./variables.env
     volumes: 
-    - ./logs/nettools.txt:/usr/src/app/logs.txt
+    - ./logs/worker_1.txt:/usr/src/app/logs.txt
     ports:
     - "9898:5050"
     networks:
       nettools_net:
         ipv4_address: 172.109.0.10
+    links:
+      - mongo_data
+    environment:
+      mongo_bdd: nettools
+      mongo_bdd_server: mongo_data
+  worker_2:
+    image: nettools
+    build:
+      context: .
+      dockerfile: ./dockerimage/nettools.dockerfile
+    restart: always
+    env_file:
+    - ./variables.env
+    volumes: 
+    - ./logs/worker_2.txt:/usr/src/app/logs.txt
+    ports:
+    - "9899:5050"
+    networks:
+      nettools_net:
+        ipv4_address: 172.109.0.11
+    links:
+      - mongo_data
+    environment:
+      mongo_bdd: nettools
+      mongo_bdd_server: mongo_data
+  mongo_data:
+    image: mongo:latest
+    restart: always
+    volumes: 
+    - ./db/mongo_data:/data/db
+    env_file:
+    - ./variables.env
+    networks:
+      nettools_net:
+        ipv4_address: 172.109.0.12
+  mongo_data_express:
+    image: mongo-express:latest
+    restart: always
+    ports:
+    - "9897:8081"
+    env_file:
+    - ./variables.env
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo_data
+    networks:
+      nettools_net:
+        ipv4_address: 172.109.0.13
+    links:
+    - mongo_data

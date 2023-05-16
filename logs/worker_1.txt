@@ -1,0 +1,5 @@
+logsINFO:tornado.access:200 GET / (172.109.0.1) 0.58ms
+WARNING:tornado.access:405 GET /favicon.ico (172.109.0.1) 0.77ms
+INFO:tornado.access:200 POST /ping (172.109.0.1) 29.41ms
+INFO:tornado.access:200 POST /ping (172.109.0.1) 26.66ms
+INFO:tornado.access:200 POST /ping (172.109.0.1) 23.05ms
