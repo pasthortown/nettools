@@ -1,8 +1,59 @@
-<nav class="navbar bg-body-tertiary bg-light">
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
   <div class="container-fluid">
     <label class="navbar-brand text-dark">
       <img src="assets/logo_kfc.png" style="height: 40px;"/>
       <span style="margin-left: 20px;">Monitoreo de Red</span>
     </label>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <div class="d-flex" role="search">
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-outline-dark text-success" title="Agregar Grupo" (click)="openDialog(content_group)">
+            <i class="fas fa-plus"></i>&nbsp;&nbsp;<i class="fas fa-cloud"></i>
+          </button>
+          <button type="button" class="btn btn-outline-dark text-warning" title="Editar Grupo" (click)="openDialog(content_group)">
+            <i class="fas fa-pen"></i>&nbsp;&nbsp;<i class="fas fa-cloud"></i>
+          </button>
+          <button type="button" class="btn btn-outline-dark text-danger" title="Eliminar Grupo" (click)="openDialog(content_group)">
+            <i class="fas fa-minus"></i>&nbsp;&nbsp;<i class="fas fa-cloud"></i>
+          </button>
+          <button type="button" class="btn btn-outline-dark text-success"  style="margin-left:10px;" title="Agregar Host" (click)="openDialog(content_host)">
+            <i class="fas fa-plus"></i>&nbsp;&nbsp;<i class="fas fa-computer"></i>
+          </button>
+          <button type="button" class="btn btn-outline-dark text-warning" title="Editar Host" (click)="openDialog(content_host)">
+            <i class="fas fa-pen"></i>&nbsp;&nbsp;<i class="fas fa-computer"></i>
+          </button>
+          <button type="button" class="btn btn-outline-dark text-danger" title="Eliminar Host" (click)="openDialog(content_host)">
+            <i class="fas fa-minus"></i>&nbsp;&nbsp;<i class="fas fa-computer"></i>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </nav>
+<ng-template #content_group let-modal>
+  <div class="modal-header">
+		<h4 class="modal-title" id="modal-basic-title">Grupo</h4>
+		<button type="button" class="btn-close" (click)="modal.dismiss('Cross click')"></button>
+	</div>
+  <div class="modal-body">
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-success" (click)="modal.close('Guardar click')">Guardar</button>
+    <button type="button" class="btn btn-outline-danger" (click)="modal.close('Cancelar click')">Cancelar</button>
+  </div>
+</ng-template>
+
+<ng-template #content_host let-modal>
+  <div class="modal-header">
+		<h4 class="modal-title" id="modal-basic-title">Host</h4>
+		<button type="button" class="btn-close" (click)="modal.dismiss('Cross click')"></button>
+	</div>
+  <div class="modal-body">
+
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-success" (click)="modal.close('Guardar click')">Guardar</button>
+    <button type="button" class="btn btn-outline-danger" (click)="modal.close('Cancelar click')">Cancelar</button>
+  </div>
+</ng-template>
