@@ -2,13 +2,13 @@ FROM python:3.8
 
 WORKDIR /usr/src/app
 
-COPY dockerimage/requirements.txt ./
+COPY worker_background/requirements.txt ./
 RUN apt-get update
 RUN apt-get install -y libpcap-dev traceroute
 RUN pip install -r requirements.txt
 RUN echo "America/Bogota" > /etc/timezone
-COPY dockerimage/nettools.py .
+COPY worker_background/worker_background.py .
 
 EXPOSE 5050
 
-CMD [ "python", "nettools.py" ]
+CMD [ "python", "worker_background.py" ]

@@ -2,13 +2,9 @@ import os
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler
 from tornado.escape import json_decode
-from ping3 import ping
-import logging
-import subprocess
 from pymongo import MongoClient
 import json
 from bson import json_util
-import socket
 import uuid
 import datetime
 
@@ -20,11 +16,6 @@ mongo_password = os.getenv('mongo_password')
 database_uri='mongodb://'+mongo_user+':'+mongo_password+'@'+ mongo_bdd_server +'/'
 client = MongoClient(database_uri)
 db = client[mongo_bdd]
-
-logging.basicConfig(filename='logs.txt', level=logging.DEBUG)
-
-def write_log(content):
-    logging.info(content)
 
 class DefaultHandler(RequestHandler):
     def set_default_headers(self):
@@ -69,15 +60,9 @@ class ActionHandler(RequestHandler):
                 group_id = content['group_id']
                 host_id = content['host_id']
                 respuesta = delete_host(group_id, host_id)
-            if (action == 'ping'):
-                target = content['target']
-                respuesta = do_ping(target)
             if (action == 'get_pings'):
                 target = content['target']
                 respuesta = get_pings(target)
-            if (action == 'tracert'):
-                target = content['target']
-                respuesta = tracert(target)
         except:
             respuesta = {'response':'Solicitud Incorrecta', 'status':'500'}
         self.write(respuesta)
@@ -145,32 +130,6 @@ def delete_host(group_id, host_id):
 def get_pings(target):
     collection = db['pings']
     toReturn = json.loads(json_util.dumps(collection.find({'target':target})))
-    return {'response':toReturn, 'status':200}
-
-def do_ping(target):
-    collection = db['pings']
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    ip = ''
-    try:
-        ip = socket.gethostbyname(target)
-        response = ping(target, timeout=2)
-        if response is None:
-            response = False
-        toReturn = str(response)
-    except Exception as e:
-        toReturn = "No se pudo hacer ping a " + str(target)
-        write_log(str(e))
-    collection.insert_one({'timestamp': timestamp, 'target':target, 'ip': ip, 'result':toReturn})
-    return {'response':toReturn, 'status':200}
-
-def tracert(target):
-    try:
-        command = ['traceroute', '-n', target]
-        output = subprocess.run(command, capture_output=True, text=True)
-        toReturn = output.stdout.strip()
-    except Exception as e:
-        toReturn = "No se pudo realizar el trazado de ruta a " + str(target)
-        write_log(str(e))
     return {'response':toReturn, 'status':200}
 
 def make_app():
