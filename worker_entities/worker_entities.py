@@ -7,11 +7,16 @@ import json
 from bson import json_util
 import uuid
 import datetime
+import jwt
+from dateutil import parser
 
 mongo_bdd = os.getenv('mongo_bdd')
 mongo_bdd_server = os.getenv('mongo_bdd_server')
 mongo_user = os.getenv('mongo_user')
 mongo_password = os.getenv('mongo_password')
+
+app_secret = os.getenv('app_secret')
+allowed_app_name = os.getenv('allowed_app_name')
 
 database_uri='mongodb://'+mongo_user+':'+mongo_password+'@'+ mongo_bdd_server +'/'
 client = MongoClient(database_uri)
@@ -38,6 +43,12 @@ class ActionHandler(RequestHandler):
     
     def post(self, action):
         content = json_decode(self.request.body)
+        headers = self.request.headers
+        token = headers['token']
+        auth = validate_token(token)
+        if auth == False:
+            self.write({'response':'Acceso Denegado', 'status':'500'})
+            return
         try:
             if (action == 'update_group'):
                 group = content['group']
@@ -131,6 +142,18 @@ def get_pings(target):
     collection = db['pings']
     toReturn = json.loads(json_util.dumps(collection.find({'target':target})))
     return {'response':toReturn, 'status':200}
+
+def validate_token(token):
+    try:
+        response = jwt.decode(token, app_secret, algorithms=['HS256'])
+        exp_time = parser.parse(response['valid_until'])
+        app_name = response['app_name']
+        if (app_name == allowed_app_name and datetime.datetime.now() < exp_time):
+            return True
+        else:
+            return False
+    except:
+        return False
 
 def make_app():
     urls = [

@@ -1,3 +1,4 @@
+import os
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler
 from tornado.escape import json_decode
@@ -5,6 +6,12 @@ from ping3 import ping
 import logging
 import subprocess
 import socket
+import datetime
+import jwt
+from dateutil import parser
+
+app_secret = os.getenv('app_secret')
+allowed_app_name = os.getenv('allowed_app_name')
 
 logging.basicConfig(filename='logs.txt', level=logging.DEBUG)
 
@@ -32,6 +39,12 @@ class ActionHandler(RequestHandler):
     
     def post(self, action):
         content = json_decode(self.request.body)
+        headers = self.request.headers
+        token = headers['token']
+        auth = validate_token(token)
+        if auth == False:
+            self.write({'response':'Acceso Denegado', 'status':'500'})
+            return
         try:
             if (action == 'ping'):
                 target = content['target']
@@ -66,6 +79,18 @@ def tracert(target):
         toReturn = "No se pudo realizar el trazado de ruta a " + str(target)
         write_log(str(e))
     return {'response':toReturn, 'status':200}
+
+def validate_token(token):
+    try:
+        response = jwt.decode(token, app_secret, algorithms=['HS256'])
+        exp_time = parser.parse(response['valid_until'])
+        app_name = response['app_name']
+        if (app_name == allowed_app_name and datetime.datetime.now() < exp_time):
+            return True
+        else:
+            return False
+    except:
+        return False
 
 def make_app():
     urls = [
