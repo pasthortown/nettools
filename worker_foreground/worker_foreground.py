@@ -41,6 +41,7 @@ class ActionHandler(RequestHandler):
         content = json_decode(self.request.body)
         headers = self.request.headers
         token = headers['token']
+        write_log(token)
         auth = validate_token(token)
         if auth == False:
             self.write({'response':'Acceso Denegado', 'status':'500'})
@@ -52,22 +53,30 @@ class ActionHandler(RequestHandler):
             if (action == 'tracert'):
                 target = content['target']
                 respuesta = tracert(target)
-        except:
+            if (action == 'telnet'):
+                target = content['target']
+                port = content['port']
+                respuesta = telnet(target, port)
+        except Exception as e:
+            write_log(e)
             respuesta = {'response':'Solicitud Incorrecta', 'status':'500'}
         self.write(respuesta)
         return
+
+def telnet(target, port):
+    pass
 
 def do_ping(target):
     ip = ''
     try:
         ip = socket.gethostbyname(target)
         response = ping(target, timeout=2)
-        if response is None:
-            response = False
+        if response is None or response == False:
+            response = 0
         toReturn = str(response)
     except Exception as e:
-        toReturn = "No se pudo hacer ping a " + str(target)
-        write_log(str(e))
+        response = 0
+        toReturn = str(response)
     return {'target':target, 'ip':ip, 'response':toReturn, 'status':200}
 
 def tracert(target):
@@ -77,7 +86,7 @@ def tracert(target):
         toReturn = output.stdout.strip()
     except Exception as e:
         toReturn = "No se pudo realizar el trazado de ruta a " + str(target)
-        write_log(str(e))
+        write_log(e)
     return {'response':toReturn, 'status':200}
 
 def validate_token(token):

@@ -1,16 +1,79 @@
-<div class="card mb-2">
-  <div class="col-12" style="text-indent: 2cm;">
+<div class="card mb-2" style="border-color: rgb(60, 68, 163);">
+  <div class="col-12" style="text-indent: 2cm; border-bottom: 1px solid; box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.5);">
     <span style="font-size: 14px; font-weight: bold; font-style: italic;">
-      {{nombre_grupo}}
+      {{group.nombre}}
+      <div class="btn-group m-2" role="group">
+        <button type="button" class="btn btn-outline-dark btn-sm" title="Editar Grupo" (click)="openDialog(content_group)">
+          <i class="fas fa-pen"></i>&nbsp;&nbsp;<i class="fas fa-cloud"></i>
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm" title="Eliminar Grupo" (click)="delete_group()">
+          <i class="fas fa-minus"></i>&nbsp;&nbsp;<i class="fas fa-cloud"></i>
+        </button>
+
+        <button type="button" class="btn btn-outline-dark btn-sm"  style="margin-left:10px;" title="Agregar Host" (click)="openDialog(content_host)">
+          <i class="fas fa-plus"></i>&nbsp;&nbsp;<i class="fas fa-computer"></i>
+        </button>
+      </div>
     </span>
   </div>
   <div class="col-12">
     <div class="row">
-      <app-host class="col-2"></app-host>
-      <app-host class="col-2"></app-host>
-      <app-host class="col-2"></app-host>
-      <app-host class="col-2"></app-host>
+      <app-host class="col-2" *ngFor="let host of group.hosts" [group_id]="group.item_id" [host]="host" (host_change)="emit_changes()"></app-host>
     </div>
-
   </div>
 </div>
+
+<ng-template #content_group let-modal>
+  <div class="modal-header">
+		<h4 class="modal-title" id="modal-basic-title">Grupo: {{group.nombre}}</h4>
+		<button type="button" class="btn-close" (click)="modal.dismiss('Cross click')"></button>
+	</div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-12">
+        <div class="mb-3">
+          <label for="group_name" class="form-label">Nombre del Grupo</label>
+          <input class="form-control" id="group_name" placeholder="Nombre del Grupo" [(ngModel)]="group.nombre">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-success" (click)="modal.close('Guardar Grupo')">Guardar</button>
+    <button type="button" class="btn btn-outline-danger" (click)="modal.dismiss('Cancelar click')">Cancelar</button>
+  </div>
+</ng-template>
+
+<ng-template #content_host let-modal>
+  <div class="modal-header">
+		<h4 class="modal-title" id="modal-basic-title">Crear Host</h4>
+		<button type="button" class="btn-close" (click)="modal.dismiss('Cross click')"></button>
+	</div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-12">
+        <div class="mb-3">
+          <label for="host_name" class="form-label">Nombre</label>
+          <input class="form-control" id="group_name" placeholder="Nombre del Host" [(ngModel)]="new_host.nombre">
+        </div>
+        <div class="mb-3">
+          <label for="host_target" class="form-label">Objetivo de Monitoreo</label>
+          <input class="form-control" id="host_target" placeholder="Objetivo de Monitoreo" [(ngModel)]="new_host.target">
+        </div>
+        <div class="mb-3">
+          <label for="host_icon" class="form-label">Icono <a href="https://fontawesome.com/" target="_blank">Buscar Icono</a></label>
+          <input class="form-control" id="host_icon" placeholder="Icono" [(ngModel)]="new_host.icon">
+          <i [class]="new_host.icon"></i>
+        </div>
+        <div class="mb-3">
+          <label for="host_description" class="form-label">Descripción</label>
+          <input class="form-control" id="host_description" placeholder="Descripción" [(ngModel)]="new_host.descripcion">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-success" (click)="modal.close('Guardar Host')">Guardar</button>
+    <button type="button" class="btn btn-outline-danger" (click)="modal.dismiss('Cancelar click')">Cancelar</button>
+  </div>
+</ng-template>

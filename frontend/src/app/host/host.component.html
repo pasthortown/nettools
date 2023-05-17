@@ -1,6 +1,70 @@
-<div class="card mb-2">
-  <div class="card-body">
-    <h5 class="card-title">Host</h5>
-    <p class="card-text">Descripcion</p>
+<div class="card m-2">
+  <div class="row p-1">
+    <div class="col-6" style="text-align: left;">
+      <i [class]="host.icon"></i>
+    </div>
+    <div class="col-6" style="text-align: right; font-size: 10px;">
+      <i class="fas fa-pen over-warning" (click)="openDialog(content_host_edit)"></i>&nbsp;&nbsp;&nbsp;<i class="fas fa-minus over-danger" (click)="delete_host()"></i>
+    </div>
+    <strong class="col-12 text-center">{{host.nombre}}</strong>
+    <small class="col-12">{{host.target}}</small>
+    <div class="col-12">
+      <span class="badge text-bg-success" (click)="openDialog(content_host_details, true)" *ngIf="host.status == 'active'">Activo</span>
+      <span class="badge text-bg-danger" (click)="openDialog(content_host_details, true)" *ngIf="host.status == 'inactive'">Inactivo</span>
+    </div>
   </div>
 </div>
+
+<ng-template #content_host_edit let-modal>
+  <div class="modal-header">
+		<h4 class="modal-title" id="modal-basic-title">Host: {{host.nombre}}</h4>
+		<button type="button" class="btn-close" (click)="modal.dismiss('Cross click')"></button>
+	</div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-12">
+        <div class="mb-3">
+          <label for="host_name" class="form-label">Nombre</label>
+          <input class="form-control" id="group_name" placeholder="Nombre del Host" [(ngModel)]="host.nombre">
+        </div>
+        <div class="mb-3">
+          <label for="host_target" class="form-label">Objetivo de Monitoreo</label>
+          <input class="form-control" id="host_target" placeholder="Objetivo de Monitoreo" [(ngModel)]="host.target">
+        </div>
+        <div class="mb-3">
+          <label for="host_icon" class="form-label">Icono <a href="https://fontawesome.com/" target="_blank">Buscar Icono</a></label>
+          <input class="form-control" id="host_icon" placeholder="Icono" [(ngModel)]="host.icon">
+          <i [class]="host.icon"></i>
+        </div>
+        <div class="mb-3">
+          <label for="host_description" class="form-label">Descripción</label>
+          <input class="form-control" id="host_description" placeholder="Descripción" [(ngModel)]="host.descripcion">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-success" (click)="modal.close('Guardar Host')">Guardar</button>
+    <button type="button" class="btn btn-outline-danger" (click)="modal.dismiss('Cancelar click')">Cancelar</button>
+  </div>
+</ng-template>
+
+<ng-template #content_host_details let-modal>
+  <div class="modal-header">
+		<h4 class="modal-title" id="modal-basic-title">Host: {{host.nombre}}</h4>
+		<button type="button" class="btn-close" (click)="modal.dismiss('Cross click')"></button>
+	</div>
+  <div class="modal-body">
+    <canvas *ngIf="show_graph"
+      baseChart width="400" height="300"
+      [type]="'line'"
+      [data]="lineChartData"
+      [options]="lineChartOptions"
+      [legend]="lineChartLegend">
+    </canvas>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-success" (click)="modal.close('Guardar click')">Guardar</button>
+    <button type="button" class="btn btn-outline-danger" (click)="modal.close('Cancelar click')">Cancelar</button>
+  </div>
+</ng-template>

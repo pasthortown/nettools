@@ -1,12 +1,7 @@
 import os
 from ping3 import ping
-import logging
-import subprocess
 from pymongo import MongoClient
-import json
-from bson import json_util
 import socket
-import uuid
 import datetime
 import time
 
@@ -19,11 +14,6 @@ database_uri='mongodb://'+mongo_user+':'+mongo_password+'@'+ mongo_bdd_server +'
 client = MongoClient(database_uri)
 db = client[mongo_bdd]
 
-logging.basicConfig(filename='logs.txt', level=logging.DEBUG)
-
-def write_log(content):
-    logging.info(content)
-
 def do_ping(target):
     collection = db['pings']
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -31,12 +21,12 @@ def do_ping(target):
     try:
         ip = socket.gethostbyname(target)
         response = ping(target, timeout=2)
-        if response is None:
-            response = False
+        if response is None or response == False:
+            response = 0
         toReturn = str(response)
     except Exception as e:
-        toReturn = "No se pudo hacer ping a " + str(target)
-        write_log(str(e))
+        response = 0
+        toReturn = str(response)
     collection.insert_one({'timestamp': timestamp, 'target':target, 'ip': ip, 'result':toReturn})
 
 def do_pings():
@@ -48,5 +38,6 @@ def do_pings():
             target = host['target']
             do_ping(target)
 
-do_pings()
-time.sleep(5)
+while(True):
+    do_pings()
+    time.sleep(5)

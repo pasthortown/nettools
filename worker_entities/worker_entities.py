@@ -2,13 +2,14 @@ import os
 from tornado.ioloop import IOLoop
 from tornado.web import Application, RequestHandler
 from tornado.escape import json_decode
-from pymongo import MongoClient
+from pymongo import MongoClient, DESCENDING
 import json
 from bson import json_util
 import uuid
 import datetime
 import jwt
 from dateutil import parser
+import logging
 
 mongo_bdd = os.getenv('mongo_bdd')
 mongo_bdd_server = os.getenv('mongo_bdd_server')
@@ -21,6 +22,11 @@ allowed_app_name = os.getenv('allowed_app_name')
 database_uri='mongodb://'+mongo_user+':'+mongo_password+'@'+ mongo_bdd_server +'/'
 client = MongoClient(database_uri)
 db = client[mongo_bdd]
+
+logging.basicConfig(filename='logs.txt', level=logging.DEBUG)
+
+def write_log(content):
+    logging.info(content)
 
 class DefaultHandler(RequestHandler):
     def set_default_headers(self):
@@ -73,11 +79,20 @@ class ActionHandler(RequestHandler):
                 respuesta = delete_host(group_id, host_id)
             if (action == 'get_pings'):
                 target = content['target']
-                respuesta = get_pings(target)
-        except:
+                quantity = content['quantity']
+                respuesta = get_pings(target, quantity)
+            if (action == 'get_groups'):
+                respuesta = get_groups()
+        except Exception as e:
+            write_log(e)
             respuesta = {'response':'Solicitud Incorrecta', 'status':'500'}
         self.write(respuesta)
         return
+
+def get_groups():
+    collection = db['groups']
+    toReturn = json.loads(json_util.dumps(collection.find({})))
+    return {'response':toReturn, 'status':200} 
 
 def create_group(group):
     collection = db['groups']
@@ -138,9 +153,12 @@ def delete_host(group_id, host_id):
     else:
         return {'response': 'Host no encontrado en el grupo', 'status': 200}
 
-def get_pings(target):
+def get_pings(target, quantity):
     collection = db['pings']
-    toReturn = json.loads(json_util.dumps(collection.find({'target':target})))
+    if (int(quantity) == -1):
+        toReturn = json.loads(json_util.dumps(collection.find({'target':target}))) 
+    else:
+        toReturn = json.loads(json_util.dumps(collection.find({'target':target}).sort('_id', DESCENDING).limit(int(quantity)))) 
     return {'response':toReturn, 'status':200}
 
 def validate_token(token):

@@ -10,6 +10,9 @@ import { BodyComponent } from './body/body.component';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { GroupModule } from './group/group.module';
 import { HostModule } from './host/host.module';
+import { HttpClientModule } from '@angular/common/http';
+import { EntitiesService } from './services/entities.service';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -21,12 +24,14 @@ import { HostModule } from './host/host.module';
     BrowserModule,
     GroupModule,
     HostModule,
+    HttpClientModule,
+    FormsModule,
     BrowserAnimationsModule,
     NgxSpinnerModule.forRoot({ type: 'ball-scale-multiple' }),
     AppRoutingModule,
     NgbModule
   ],
-  providers: [],
+  providers: [EntitiesService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

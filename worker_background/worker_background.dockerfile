@@ -9,6 +9,4 @@ RUN pip install -r requirements.txt
 RUN echo "America/Bogota" > /etc/timezone
 COPY worker_background/worker_background.py .
 
-EXPOSE 5050
-
 CMD [ "python", "worker_background.py" ]

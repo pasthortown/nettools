@@ -13,6 +13,8 @@ services:
       context: .
       dockerfile: ./worker_foreground/worker_foreground.dockerfile
     restart: always
+    env_file:
+    - ./variables.env
     volumes: 
     - ./logs/worker_foreground.txt:/usr/src/app/logs.txt
     ports:
@@ -30,8 +32,6 @@ services:
     - ./variables.env
     volumes: 
     - ./logs/worker_background.txt:/usr/src/app/logs.txt
-    ports:
-    - "9899:5050"
     networks:
       nettools_net:
         ipv4_address: 172.109.0.11
@@ -46,6 +46,8 @@ services:
       context: .
       dockerfile: ./worker_entities/worker_entities.dockerfile
     restart: always
+    volumes: 
+    - ./logs/worker_entities.txt:/usr/src/app/logs.txt
     env_file:
     - ./variables.env
     ports:
