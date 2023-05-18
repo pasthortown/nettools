@@ -71,7 +71,18 @@
 	</div>
   <div class="modal-body">
     <div class="row">
+      <div class="col-6">
+        <small><strong>Desde:</strong></small><br/>
+        <input type="datetime-local" [ngModel]="fecha_desde | date:'yyyy-MM-dd HH:mm'" (ngModelChange)="fecha_desde=$event" />
+      </div>
+      <div class="col-6">
+        <small><strong>Hasta:</strong></small><br/>
+        <input type="datetime-local" [ngModel]="fecha_hasta | date:'yyyy-MM-dd HH:mm'" (ngModelChange)="fecha_hasta=$event" />
+      </div>
+    </div>
+    <div class="row">
       <div class="col-12">
+        <hr>
         {{host.descripcion}}
       </div>
     </div>
@@ -83,7 +94,7 @@
         [options]="lineChartOptions"
         [legend]="lineChartLegend">
       </canvas>
-      <small class="col-12 text-center">Monitoreo de la última media hora</small>
+      <small class="col-12 text-center"><strong>TTL Mínimo:</strong> {{min_ttl| number:'1.4-4'}} y <strong>TTL Máximo:</strong> {{max_ttl| number:'1.4-4'}}</small>
     </div>
   </div>
   <div class="modal-footer">

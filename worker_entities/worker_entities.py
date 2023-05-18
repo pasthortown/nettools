@@ -88,8 +88,12 @@ class ActionHandler(RequestHandler):
                 respuesta = delete_host(group_id, host_id)
             if (action == 'get_pings'):
                 target = content['target']
-                quantity = content['quantity']
-                respuesta = get_pings(target, quantity)
+                since = content['since']
+                to = content['to']
+                respuesta = get_pings(target, since, to)
+            if (action == 'get_last_ping'):
+                target = content['target']
+                respuesta = get_last_ping(target)
             if (action == 'get_groups'):
                 respuesta = get_groups()
             if (action == 'get_profiles'):
@@ -190,12 +194,27 @@ def delete_host(group_id, host_id):
     else:
         return {'response': 'Host no encontrado en el grupo', 'status': 200}
 
-def get_pings(target, quantity):
+def get_last_ping(target):
     collection = db['pings']
-    if (int(quantity) == -1):
-        toReturn = json.loads(json_util.dumps(collection.find({'target':target}))) 
+    toReturn = json.loads(json_util.dumps(collection.find({
+        'target': target
+    }).sort('_id', DESCENDING).limit(1)))
+    return {'response':toReturn, 'status':200}
+
+def get_pings(target, since, to):
+    collection = db['pings']
+    if (since == to):
+        toReturn = json.loads(json_util.dumps(collection.find({
+            'target': target
+        }).sort('_id', DESCENDING)))
     else:
-        toReturn = json.loads(json_util.dumps(collection.find({'target':target}).sort('_id', DESCENDING).limit(int(quantity)))) 
+        toReturn = json.loads(json_util.dumps(collection.find({
+            'target': target,
+            'timestamp': {
+                '$gte': since,
+                '$lte': to
+            }
+        }).sort('_id', DESCENDING)))
     return {'response':toReturn, 'status':200}
 
 def validate_token(token):

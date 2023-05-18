@@ -70,9 +70,15 @@ export class EntitiesService {
     return this.http.post(environment.api_entities + 'delete_host', JSON.stringify(data), this.options ).toPromise();
   }
 
-  get_pings(target: string, quantity: number) {
+  get_last_ping(target: string) {
     this.build_headers();
-    const data = { target: target, quantity: quantity};
+    const data = { target: target};
+    return this.http.post(environment.api_entities + 'get_last_ping', JSON.stringify(data), this.options ).toPromise();
+  }
+
+  get_pings(target: string, since: string, to: string) {
+    this.build_headers();
+    const data = { target: target, since: since, to: to};
     return this.http.post(environment.api_entities + 'get_pings', JSON.stringify(data), this.options ).toPromise();
   }
 
