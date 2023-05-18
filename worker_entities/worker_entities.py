@@ -94,6 +94,14 @@ class ActionHandler(RequestHandler):
             if (action == 'get_last_ping'):
                 target = content['target']
                 respuesta = get_last_ping(target)
+            if (action == 'get_url_health'):
+                target = content['target']
+                since = content['since']
+                to = content['to']
+                respuesta = get_url_health(target, since, to)
+            if (action == 'get_last_url_health'):
+                target = content['target']
+                respuesta = get_last_url_health(target)
             if (action == 'get_groups'):
                 respuesta = get_groups()
             if (action == 'get_profiles'):
@@ -194,6 +202,13 @@ def delete_host(group_id, host_id):
     else:
         return {'response': 'Host no encontrado en el grupo', 'status': 200}
 
+def get_last_url_health(target):
+    collection = db['url_health']
+    toReturn = json.loads(json_util.dumps(collection.find({
+        'target': target
+    }).sort('_id', DESCENDING).limit(1)))
+    return {'response':toReturn, 'status':200}
+
 def get_last_ping(target):
     collection = db['pings']
     toReturn = json.loads(json_util.dumps(collection.find({
@@ -203,6 +218,22 @@ def get_last_ping(target):
 
 def get_pings(target, since, to):
     collection = db['pings']
+    if (since == to):
+        toReturn = json.loads(json_util.dumps(collection.find({
+            'target': target
+        }).sort('_id', DESCENDING)))
+    else:
+        toReturn = json.loads(json_util.dumps(collection.find({
+            'target': target,
+            'timestamp': {
+                '$gte': since,
+                '$lte': to
+            }
+        }).sort('_id', DESCENDING)))
+    return {'response':toReturn, 'status':200}
+
+def get_url_health(target, since, to):
+    collection = db['url_health']
     if (since == to):
         toReturn = json.loads(json_util.dumps(collection.find({
             'target': target

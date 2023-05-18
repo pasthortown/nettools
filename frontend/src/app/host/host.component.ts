@@ -34,6 +34,7 @@ export class HostComponent implements OnInit {
 
   max_ttl: number = 0;
   min_ttl: number = 0;
+  availability: number = 0;
 
   constructor(
     private spinner: NgxSpinnerService,
@@ -54,14 +55,25 @@ export class HostComponent implements OnInit {
   }
 
   get_host_status() {
-    this.entitiesService.get_last_ping(this.host.target).then( (r: any) => {
-      let ping: any = r.response[0];
-      if (ping.result > 0) {
-        this.host.status = 'active';
-      } else {
-        this.host.status = 'inactive';
-      }
-    }).catch( e => { console.log(e); });
+    if (this.host.is_url) {
+      this.entitiesService.get_last_url_health(this.host.target).then( (r: any) => {
+        let url_health: any = r.response[0];
+        if (url_health.status_code == 200) {
+          this.host.status = 'active';
+        } else {
+          this.host.status = 'inactive';
+        }
+      }).catch( e => { console.log(e); });
+    } else {
+      this.entitiesService.get_last_ping(this.host.target).then( (r: any) => {
+        let ping: any = r.response[0];
+        if (ping.result > 0) {
+          this.host.status = 'active';
+        } else {
+          this.host.status = 'inactive';
+        }
+      }).catch( e => { console.log(e); });
+    }
   }
 
   build_graph() {
@@ -73,18 +85,31 @@ export class HostComponent implements OnInit {
       const date = new Date(ping.timestamp);
       const tiempo = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       labels.push(tiempo);
-      let ttl: number = Number.parseFloat(ping.result);
-      if (ttl == 0) {
-        dataset_correct.push(0);
-        dataset_error.push(1);
+      if (this.host.is_url == false) {
+        let ttl: number = Number.parseFloat(ping.result);
+        if (ttl == 0) {
+          dataset_correct.push(0);
+          dataset_error.push(1);
+        } else {
+          dataset_correct.push(ttl);
+          dataset_error.push(0);
+        }
       } else {
-        dataset_correct.push(ttl);
-        dataset_error.push(0);
+        let status_code: number = Number.parseInt(ping.status_code);
+        if (status_code == 200) {
+          dataset_correct.push(1);
+          dataset_error.push(0);
+        } else {
+          dataset_correct.push(0);
+          dataset_error.push(1);
+        }
       }
     });
     const dataset_sin_cero: number[] = dataset_correct.filter((numero) => numero !== 0);
     this.min_ttl = Math.min(...dataset_sin_cero);
     this.max_ttl = Math.max(...dataset_correct);
+    const cantidad_errores: number = dataset_error.reduce((count, value) => count + (value === 1 ? 1 : 0), 0);
+    this.availability = ((dataset_correct.length - cantidad_errores) / dataset_correct.length) * 100
     if (this.max_ttl > 0) {
       dataset_error = dataset_error.map((numero: number) => numero * this.max_ttl);
     }
@@ -109,6 +134,27 @@ export class HostComponent implements OnInit {
     this.show_graph = true;
   }
 
+  get_url_health() {
+    this.host.pings = [];
+    const fecha_desde_str: string = this.fecha_desde.replace('T', ' ');
+    const fecha_hasta_str: string = this.fecha_hasta.replace('T', ' ');
+    if (new Date(fecha_desde_str) > new Date(fecha_hasta_str)) {
+      Swal.fire({
+        title: 'Rango de Fechas',
+        icon: 'error',
+        text: 'La fecha de final debe ser mayor a la fecha de inicio',
+        showCloseButton: true
+      });
+      return;
+    }
+    this.spinner.show();
+    this.entitiesService.get_url_health(this.host.target, fecha_desde_str, fecha_hasta_str).then( (r:any) => {
+      this.host.pings = r.response;
+      this.build_graph();
+      this.spinner.hide();
+    }).catch( e => { console.log(e); });
+  }
+
   get_pings() {
     this.host.pings = [];
     const fecha_desde_str: string = this.fecha_desde.replace('T', ' ');
@@ -123,7 +169,7 @@ export class HostComponent implements OnInit {
       return;
     }
     this.spinner.show();
-    this.entitiesService.get_pings(this.host.target, fecha_desde_str,fecha_hasta_str).then( (r:any) => {
+    this.entitiesService.get_pings(this.host.target, fecha_desde_str, fecha_hasta_str).then( (r:any) => {
       this.host.pings = r.response;
       this.build_graph();
       this.spinner.hide();
@@ -179,15 +225,21 @@ export class HostComponent implements OnInit {
   }
 
   openDialog(content: any, get_pings: boolean = false) {
-    if (get_pings) {
+    if (get_pings && !this.host.is_url) {
       this.fecha_desde = format(new Date(), 'yyyy-MM-dd HH:mm');
       this.fecha_hasta = format(new Date(), 'yyyy-MM-dd HH:mm');
       this.get_pings();
+    }
+    if (get_pings && this.host.is_url) {
+      this.fecha_desde = format(new Date(), 'yyyy-MM-dd HH:mm');
+      this.fecha_hasta = format(new Date(), 'yyyy-MM-dd HH:mm');
+      this.get_url_health();
     }
     this.modalService.open(content, { centered: true , size: 'lg', backdrop: 'static', keyboard: false }).result.then(( response => {
       if (response == 'Guardar Host') {
         let toUpdate: any = {
           item_id: this.host.item_id,
+          is_url: false,
           nombre: this.host.nombre,
           target: this.host.target,
           descripcion: this.host.descripcion,
@@ -197,6 +249,28 @@ export class HostComponent implements OnInit {
         if (toUpdate.priority == '' || toUpdate.nombre == '' || toUpdate.target == '' || toUpdate.descripcion == '' || toUpdate.icon == '') {
           Swal.fire(
             'Guardar Host',
+            'Todos los datos son requeridos',
+            'error'
+          );
+        } else {
+          this.entitiesService.update_host(this.group_id, toUpdate).then( (r:any) => {
+            this.host_change.emit(this.host);
+          }).catch( e => { console.log(e); });
+        }
+      }
+      if (response == 'Guardar URL') {
+        let toUpdate: any = {
+          item_id: this.host.item_id,
+          is_url: true,
+          nombre: this.host.nombre,
+          target: this.host.target,
+          descripcion: this.host.descripcion,
+          icon: this.host.icon,
+          priority: this.host.priority
+        };
+        if (toUpdate.priority == '' || toUpdate.nombre == '' || toUpdate.target == '' || toUpdate.descripcion == '' || toUpdate.icon == '') {
+          Swal.fire(
+            'Guardar URL',
             'Todos los datos son requeridos',
             'error'
           );

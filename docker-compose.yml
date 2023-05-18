@@ -40,6 +40,24 @@ services:
     environment:
       mongo_bdd: nettools
       mongo_bdd_server: mongo_data
+  url_worker_background:
+    image: url_worker_background
+    build:
+      context: .
+      dockerfile: ./url_worker_background/url_worker_background.dockerfile
+    restart: always
+    volumes: 
+    - ./logs/url_worker_background.txt:/usr/src/app/logs.txt
+    env_file:
+    - ./variables.env
+    networks:
+      nettools_net:
+        ipv4_address: 172.109.0.12
+    links:
+      - mongo_data
+    environment:
+      mongo_bdd: nettools
+      mongo_bdd_server: mongo_data
   worker_entities:
     image: worker_entities
     build:
@@ -54,7 +72,7 @@ services:
     - "9896:5050"
     networks:
       nettools_net:
-        ipv4_address: 172.109.0.12
+        ipv4_address: 172.109.0.13
     links:
       - mongo_data
     environment:
@@ -69,7 +87,7 @@ services:
     - ./variables.env
     networks:
       nettools_net:
-        ipv4_address: 172.109.0.13
+        ipv4_address: 172.109.0.14
   mongo_data_express:
     image: mongo-express:latest
     restart: always
@@ -81,6 +99,6 @@ services:
       ME_CONFIG_MONGODB_SERVER: mongo_data
     networks:
       nettools_net:
-        ipv4_address: 172.109.0.14
+        ipv4_address: 172.109.0.15
     links:
     - mongo_data

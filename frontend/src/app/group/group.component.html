@@ -13,6 +13,9 @@
         <button type="button" class="btn btn-outline-dark btn-sm"  style="margin-left:10px;" title="Agregar Host" (click)="openDialog(content_host)">
           <i class="fas fa-plus"></i>&nbsp;&nbsp;<i class="fas fa-computer"></i>
         </button>
+        <button type="button" class="btn btn-outline-dark btn-sm" title="Agregar Host" (click)="openDialog(content_url)">
+          <i class="fas fa-plus"></i>&nbsp;&nbsp;<i class="fas fa-globe"></i>
+        </button>
       </div>
     </span>
   </div>
@@ -78,6 +81,45 @@
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline-success" (click)="modal.close('Guardar Host')">Guardar</button>
+    <button type="button" class="btn btn-outline-danger" (click)="modal.dismiss('Cancelar click')">Cancelar</button>
+  </div>
+</ng-template>
+
+<ng-template #content_url let-modal>
+  <div class="modal-header">
+		<h4 class="modal-title" id="modal-basic-title">Crear URL</h4>
+		<button type="button" class="btn-close" (click)="modal.dismiss('Cross click')"></button>
+	</div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-12">
+        <div class="mb-3">
+          <label for="host_name" class="form-label">Nombre</label>
+          <input class="form-control" id="group_name" placeholder="Nombre del Host" [(ngModel)]="new_host.nombre">
+        </div>
+        <div class="mb-3">
+          <label for="host_target" class="form-label">Objetivo de Monitoreo</label>
+          <input class="form-control" id="host_target" placeholder="Objetivo de Monitoreo" [(ngModel)]="new_host.target">
+          <small><a [href]="new_host.target" target="_blank">{{new_host.target}}</a></small>
+        </div>
+        <div class="mb-3">
+          <label for="host_icon" class="form-label">Icono <a href="https://fontawesome.com/" target="_blank">Buscar Icono</a></label>
+          <input class="form-control" id="host_icon" placeholder="Icono" [(ngModel)]="new_host.icon">
+          <i [class]="new_host.icon"></i>
+        </div>
+        <div class="mb-3">
+          <label for="host_prority" class="form-label">Prioridad</label>
+          <input class="form-control" id="host_prority" placeholder="Prioridad" [(ngModel)]="new_host.priority">
+        </div>
+        <div class="mb-3">
+          <label for="host_description" class="form-label">Descripción</label>
+          <input class="form-control" id="host_description" placeholder="Descripción" [(ngModel)]="new_host.descripcion">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-success" (click)="modal.close('Guardar URL')">Guardar</button>
     <button type="button" class="btn btn-outline-danger" (click)="modal.dismiss('Cancelar click')">Cancelar</button>
   </div>
 </ng-template>

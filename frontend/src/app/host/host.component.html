@@ -1,11 +1,15 @@
 <div class="card m-2">
   <div class="row p-1">
-    <div class="col-6" style="text-align: left;">
-      <i [class]="host.icon"></i>
+    <div class="col-2">
+      <i [class]="host.icon" style="font-size: 20px;"></i>
     </div>
-    <div class="col-6" style="text-align: right; font-size: 10px;">
-      <i class="fas fa-pen over-warning" (click)="openDialog(content_host_edit)"></i>&nbsp;&nbsp;&nbsp;<i class="fas fa-minus over-danger" (click)="delete_host()"></i>
+    <div class="col-10 text-end">
+      <i class="fas fa-pen over-warning" *ngIf="!host.is_url" style="font-size: 10px;" (click)="openDialog(content_host_edit)"></i>
+      <i class="fas fa-pen over-warning" *ngIf="host.is_url" style="font-size: 10px;" (click)="openDialog(content_url_edit)"></i>&nbsp;
+      <i class="fas fa-minus over-danger" style="font-size: 10px;" (click)="delete_host()"></i>
     </div>
+  </div>
+  <div class="row p-1">
     <strong class="col-12 text-center">{{host.nombre}}</strong>
     <small class="col-12">{{host.target}}</small>
     <div class="col-12">
@@ -56,13 +60,16 @@
 <ng-template #content_host_details let-modal>
   <div class="modal-header">
     <div class="btn-group" role="group">
-      <button type="button" class="btn btn-outline-dark" title="Refrescar" (click)="get_pings()">
+      <button *ngIf="!host.is_url" type="button" class="btn btn-outline-dark" title="Refrescar" (click)="get_pings()">
         <i class="fas fa-refresh"></i>
       </button>
-      <button type="button" class="btn btn-outline-dark" title="Telnet" (click)="telnet()">
+      <button *ngIf="host.is_url" type="button" class="btn btn-outline-dark" title="Refrescar" (click)="get_url_health()">
+        <i class="fas fa-refresh"></i>
+      </button>
+      <button *ngIf="!host.is_url" type="button" class="btn btn-outline-dark" title="Telnet" (click)="telnet()">
         <i class="fas fa-link"></i>
       </button>
-      <button type="button" class="btn btn-outline-dark" title="Trazar Ruta" (click)="trace_route()">
+      <button *ngIf="!host.is_url" type="button" class="btn btn-outline-dark" title="Trazar Ruta" (click)="trace_route()">
         <i class="fas fa-network-wired"></i>
       </button>
     </div>
@@ -88,17 +95,57 @@
     </div>
     <div class="row">
       <canvas *ngIf="show_graph"
-        baseChart class="col-12" height="500px"
+        baseChart class="col-12" style="height: 50vh;"
         [type]="'bar'"
         [data]="lineChartData"
         [options]="lineChartOptions"
         [legend]="lineChartLegend">
       </canvas>
-      <small class="col-12 text-center"><strong>TTL Mínimo:</strong> {{min_ttl| number:'1.4-4'}} y <strong>TTL Máximo:</strong> {{max_ttl| number:'1.4-4'}}</small>
+      <small *ngIf="!host.is_url" class="col-12 text-center"><strong>TTL Mínimo:</strong> {{min_ttl| number:'1.4-4'}} y <strong>TTL Máximo:</strong> {{max_ttl| number:'1.4-4'}}</small>
+      <small *ngIf="host.is_url" class="col-12 text-center"><strong>Disponibilidad:</strong> {{availability | number:'1.4-4'}} %</small>
     </div>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline-success" (click)="modal.close('Guardar click')">Guardar</button>
     <button type="button" class="btn btn-outline-danger" (click)="modal.close('Cancelar click')">Cancelar</button>
+  </div>
+</ng-template>
+
+<ng-template #content_url_edit let-modal>
+  <div class="modal-header">
+		<h4 class="modal-title" id="modal-basic-title">URL: {{host.nombre}}</h4>
+		<button type="button" class="btn-close" (click)="modal.dismiss('Cross click')"></button>
+	</div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-12">
+        <div class="mb-3">
+          <label for="host_name" class="form-label">Nombre</label>
+          <input class="form-control" id="group_name" placeholder="Nombre del Host" [(ngModel)]="host.nombre">
+        </div>
+        <div class="mb-3">
+          <label for="host_target" class="form-label">Objetivo de Monitoreo</label>
+          <input class="form-control" id="host_target" placeholder="Objetivo de Monitoreo" [(ngModel)]="host.target">
+          <small><a [href]="host.target" target="_blank">{{host.target}}</a></small>
+        </div>
+        <div class="mb-3">
+          <label for="host_icon" class="form-label">Icono <a href="https://fontawesome.com/" target="_blank">Buscar Icono</a></label>
+          <input class="form-control" id="host_icon" placeholder="Icono" [(ngModel)]="host.icon">
+          <i [class]="host.icon"></i>
+        </div>
+        <div class="mb-3">
+          <label for="host_prority" class="form-label">Prioridad</label>
+          <input class="form-control" id="host_prority" placeholder="Prioridad" [(ngModel)]="host.priority">
+        </div>
+        <div class="mb-3">
+          <label for="host_description" class="form-label">Descripción</label>
+          <input class="form-control" id="host_description" placeholder="Descripción" [(ngModel)]="host.descripcion">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-success" (click)="modal.close('Guardar URL')">Guardar</button>
+    <button type="button" class="btn btn-outline-danger" (click)="modal.dismiss('Cancelar click')">Cancelar</button>
   </div>
 </ng-template>

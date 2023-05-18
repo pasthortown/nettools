@@ -16,6 +16,7 @@ export class GroupComponent implements OnInit {;
   };
 
   new_host: any = {
+    is_url: false,
     nombre: '',
     target: '',
     descripcion: '',
@@ -64,9 +65,24 @@ export class GroupComponent implements OnInit {;
         }
       }
       if (response == 'Guardar Host') {
+        this.new_host.is_url = false;
         if (this.new_host.priority == '' || this.new_host.nombre == '' || this.new_host.target == '' || this.new_host.descripcion == '' || this.new_host.icon == '') {
           Swal.fire(
             'Guardar Host',
+            'Todos los datos son requeridos',
+            'error'
+          );
+        } else {
+          this.entitiesService.create_host(this.group.item_id, this.new_host).then( (r:any) => {
+            this.emit_changes();
+          }).catch( e => { console.log(e); });
+        }
+      }
+      if (response == 'Guardar URL') {
+        this.new_host.is_url = true;
+        if (this.new_host.priority == '' || this.new_host.nombre == '' || this.new_host.target == '' || this.new_host.descripcion == '' || this.new_host.icon == '') {
+          Swal.fire(
+            'Guardar URL',
             'Todos los datos son requeridos',
             'error'
           );

@@ -8,7 +8,6 @@ import { NgxSpinnerService } from 'ngx-spinner';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  title = 'frontend';
   groups: any[] = [];
   profiles: any[] = [];
   profile_selected: any = { item_id: 'all', nombre: 'Visión Completa', groups: [] };
