@@ -56,6 +56,15 @@ class ActionHandler(RequestHandler):
             self.write({'response':'Acceso Denegado', 'status':'500'})
             return
         try:
+            if (action == 'update_profile'):
+                profile = content['profile']
+                respuesta = update_profile(profile)
+            if (action == 'create_profile'):
+                profile = content['profile']
+                respuesta = create_profile(profile)
+            if (action == 'delete_profile'):
+                profile_id = content['profile_id']
+                respuesta = delete_profile(profile_id)
             if (action == 'update_group'):
                 group = content['group']
                 respuesta = update_group(group)
@@ -83,12 +92,40 @@ class ActionHandler(RequestHandler):
                 respuesta = get_pings(target, quantity)
             if (action == 'get_groups'):
                 respuesta = get_groups()
+            if (action == 'get_profiles'):
+                respuesta = get_profiles()
         except Exception as e:
             write_log(e)
             respuesta = {'response':'Solicitud Incorrecta', 'status':'500'}
         self.write(respuesta)
         return
 
+def get_profiles():
+    collection = db['profiles']
+    toReturn = json.loads(json_util.dumps(collection.find({})))
+    return {'response':toReturn, 'status':200} 
+
+def update_profile(profile):
+    collection = db['profiles']
+    profile['timestamp'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    collection.update_one({'item_id': profile['item_id']}, {'$set': profile})
+    return {'response':'Grupo actualizado', 'status':200}
+
+def create_profile(profile):
+    collection = db['profiles']
+    profile['item_id'] = str(uuid.uuid4())
+    profile['timestamp'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    collection.insert_one(profile)
+    return {'response':'Perfil creado', 'status':200}
+
+def delete_profile(profile_id):
+    collection = db['profiles']
+    result = collection.delete_one({'item_id': profile_id})
+    if result.deleted_count > 0:
+        return {'response': 'Perfil eliminado', 'status': 200}
+    else:
+        return {'response': 'Perfil no encontrado', 'status': 200}
+    
 def get_groups():
     collection = db['groups']
     toReturn = json.loads(json_util.dumps(collection.find({})))

@@ -1,5 +1,5 @@
-<app-navbar class="app-navbar" [groups]="groups" (groups_change)="refresh()"></app-navbar>
-<app-body [groups]="groups" (groups_change)="refresh()"></app-body>
+<app-navbar class="app-navbar" [groups]="groups" (groups_change)="refresh()" [profiles]="profiles" (profile_change)="refresh()" (profile_select)="select_profile($event)"></app-navbar>
+<app-body [groups]="groups" (groups_change)="refresh()" [profile_selected]="profile_selected"></app-body>
 <ngx-spinner type="ball-scale-multiple">
   <p style="color: rgb(255, 255, 255)" > Procesando información, por favor espere... </p>
 </ngx-spinner>

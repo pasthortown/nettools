@@ -9,6 +9,7 @@ import socket
 import datetime
 import jwt
 from dateutil import parser
+import telnetlib
 
 app_secret = os.getenv('app_secret')
 allowed_app_name = os.getenv('allowed_app_name')
@@ -64,7 +65,17 @@ class ActionHandler(RequestHandler):
         return
 
 def telnet(target, port):
-    pass
+    toReturn = do_telnet(target, port)
+    return {'target':target, 'response':toReturn, 'status':200}
+
+def do_telnet(target, port):
+    try:
+        with telnetlib.Telnet(target, port, timeout=5) as tn:
+            return True
+    except ConnectionRefusedError:
+        return False
+    except Exception as e:
+        return False
 
 def do_ping(target):
     ip = ''
@@ -80,14 +91,22 @@ def do_ping(target):
     return {'target':target, 'ip':ip, 'response':toReturn, 'status':200}
 
 def tracert(target):
+    max_hops = 30
+    current_hop = 1
     try:
-        command = ['traceroute', '-n', target]
-        output = subprocess.run(command, capture_output=True, text=True)
-        toReturn = output.stdout.strip()
+        while current_hop <= max_hops:
+            command = ['traceroute', '-n', '-q', str(current_hop), target]
+            output = subprocess.run(command, capture_output=True, text=True)
+            toReturn = output.stdout.strip()
+            if target in toReturn:
+                break
+            current_hop += 1
+        if current_hop > max_hops:
+            toReturn = "No se pudo alcanzar el objetivo en el número máximo de saltos."
     except Exception as e:
         toReturn = "No se pudo realizar el trazado de ruta a " + str(target)
         write_log(e)
-    return {'response':toReturn, 'status':200}
+    return {'response': toReturn, 'status': 200}
 
 def validate_token(token):
     try:

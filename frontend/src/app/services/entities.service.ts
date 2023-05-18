@@ -22,10 +22,22 @@ export class EntitiesService {
     return this.http.post(environment.api_entities + 'update_group', JSON.stringify(data), this.options ).toPromise();
   }
 
+  update_profile(profile: any) {
+    this.build_headers();
+    const data = { profile: profile };
+    return this.http.post(environment.api_entities + 'update_profile', JSON.stringify(data), this.options ).toPromise();
+  }
+
   update_host(group_id: string, host: any) {
     this.build_headers();
     const data = { group_id: group_id, host: host };
     return this.http.post(environment.api_entities + 'update_host', JSON.stringify(data), this.options ).toPromise();
+  }
+
+  create_profile(profile: any) {
+    this.build_headers();
+    const data = { profile: profile };
+    return this.http.post(environment.api_entities + 'create_profile', JSON.stringify(data), this.options ).toPromise();
   }
 
   create_group(group: any) {
@@ -46,6 +58,12 @@ export class EntitiesService {
     return this.http.post(environment.api_entities + 'delete_group', JSON.stringify(data), this.options ).toPromise();
   }
 
+  delete_profile(profile_id: string) {
+    this.build_headers();
+    const data = { profile_id: profile_id };
+    return this.http.post(environment.api_entities + 'delete_profile', JSON.stringify(data), this.options ).toPromise();
+  }
+
   delete_host(group_id: string, host_id: string) {
     this.build_headers();
     const data = { group_id: group_id, host_id: host_id };
@@ -62,5 +80,11 @@ export class EntitiesService {
     this.build_headers();
     const data = {};
     return this.http.post(environment.api_entities + 'get_groups', JSON.stringify(data), this.options ).toPromise();
+  }
+
+  get_profiles() {
+    this.build_headers();
+    const data = {};
+    return this.http.post(environment.api_entities + 'get_profiles', JSON.stringify(data), this.options ).toPromise();
   }
 }

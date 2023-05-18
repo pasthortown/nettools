@@ -66,6 +66,10 @@
           <i [class]="new_host.icon"></i>
         </div>
         <div class="mb-3">
+          <label for="host_prority" class="form-label">Prioridad</label>
+          <input class="form-control" id="host_prority" placeholder="Prioridad" [(ngModel)]="new_host.priority">
+        </div>
+        <div class="mb-3">
           <label for="host_description" class="form-label">Descripción</label>
           <input class="form-control" id="host_description" placeholder="Descripción" [(ngModel)]="new_host.descripcion">
         </div>

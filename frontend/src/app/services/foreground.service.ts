@@ -28,7 +28,7 @@ export class ForegroundService {
     return this.http.post(environment.api_foreground + 'tracert', JSON.stringify(data), this.options ).toPromise();
   }
 
-  telnet(target: string, port: string) {
+  telnet(target: string, port: Number) {
     this.build_headers();
     const data = { target: target, port: port };
     return this.http.post(environment.api_foreground + 'telnet', JSON.stringify(data), this.options ).toPromise();

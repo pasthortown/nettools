@@ -18,7 +18,8 @@ export class GroupComponent implements OnInit {;
   new_host: any = {
     nombre: '',
     target: '',
-    descripcion: ''
+    descripcion: '',
+    priority: '-'
   }
 
   constructor(
@@ -28,6 +29,21 @@ export class GroupComponent implements OnInit {;
   ngOnInit(): void {
 
   }
+
+  ngOnChanges() {
+    if (this.group.hosts.length > 0) {
+      this.group.hosts.sort((a: any, b: any) => {
+        if (a.priority > b.priority) {
+          return 1;
+        }
+        if (a.priority < b.priority) {
+          return -1;
+        }
+        return 0;
+      });
+    }
+  }
+
   openDialog(content: any) {
     this.modalService.open(content, { centered: true , size: 'lg', backdrop: 'static', keyboard: false }).result.then(( response => {
       if (response == 'Guardar Grupo') {
@@ -48,7 +64,7 @@ export class GroupComponent implements OnInit {;
         }
       }
       if (response == 'Guardar Host') {
-        if (this.new_host.nombre == '' || this.new_host.target == '' || this.new_host.descripcion == '' || this.new_host.icon == '') {
+        if (this.new_host.priority == '' || this.new_host.nombre == '' || this.new_host.target == '' || this.new_host.descripcion == '' || this.new_host.icon == '') {
           Swal.fire(
             'Guardar Host',
             'Todos los datos son requeridos',
