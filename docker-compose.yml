@@ -7,6 +7,25 @@ networks:
         - subnet: 172.109.0.0/24
 
 services:
+  web:
+    image: php:8.1.19-apache
+    restart: always
+    ports:
+    - "8081:80" #phpinfo
+    - "8080:8080" #frontend
+    volumes:
+    - ./conf/apache2.conf:/etc/apache2/apache2.conf
+    - ./conf/charset.conf:/etc/apache2/conf-available/charset.conf
+    - ./conf/php.ini:/usr/local/etc/php/php.ini
+    - ./public_html:/var/www
+    - ./conf/ssl:/conf/ssl
+    - ./sites_aviable:/etc/apache2/extra-enabled
+    - ./logs:/logs
+    networks:
+      nettools_net:
+        ipv4_address: 172.109.0.9
+    environment:
+      TZ: America/Bogota
   worker_foreground:
     image: worker_foreground
     build:
@@ -18,7 +37,7 @@ services:
     volumes: 
     - ./logs/worker_foreground.txt:/usr/src/app/logs.txt
     ports:
-    - "9898:5050"
+    - "9890:5050"
     networks:
       nettools_net:
         ipv4_address: 172.109.0.10
@@ -69,7 +88,7 @@ services:
     env_file:
     - ./variables.env
     ports:
-    - "9896:5050"
+    - "9891:5050"
     networks:
       nettools_net:
         ipv4_address: 172.109.0.13
@@ -92,7 +111,7 @@ services:
     image: mongo-express:latest
     restart: always
     ports:
-    - "9897:8081"
+    - "8027:8081"
     env_file:
     - ./variables.env
     environment:
