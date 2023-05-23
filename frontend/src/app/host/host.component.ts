@@ -118,7 +118,7 @@ export class HostComponent implements OnInit {
         data: dataset_correct.reverse(),
         label: 'Alcanzados',
         fill: true,
-        backgroundColor: 'rgba(80, 222, 33, 0.3)'
+        backgroundColor: 'rgba(80, 222, 33, 0.75)'
       },
       {
         data: dataset_error.reverse(),
