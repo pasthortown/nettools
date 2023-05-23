@@ -225,14 +225,16 @@ export class HostComponent implements OnInit {
   }
 
   openDialog(content: any, get_pings: boolean = false) {
+    const fechaHasta = new Date();
+    const fechaDesde = new Date(fechaHasta.getTime() - 30 * 60000); // Resta 30 minutos en milisegundos
+    const formattedFechaDesde = format(fechaDesde, 'yyyy-MM-dd HH:mm');
+    const formattedFechaHasta = format(fechaHasta, 'yyyy-MM-dd HH:mm');
+    this.fecha_desde = formattedFechaDesde;
+    this.fecha_hasta = formattedFechaHasta;
     if (get_pings && !this.host.is_url) {
-      this.fecha_desde = format(new Date(), 'yyyy-MM-dd HH:mm');
-      this.fecha_hasta = format(new Date(), 'yyyy-MM-dd HH:mm');
       this.get_pings();
     }
     if (get_pings && this.host.is_url) {
-      this.fecha_desde = format(new Date(), 'yyyy-MM-dd HH:mm');
-      this.fecha_hasta = format(new Date(), 'yyyy-MM-dd HH:mm');
       this.get_url_health();
     }
     this.modalService.open(content, { centered: true , size: 'lg', backdrop: 'static', keyboard: false }).result.then(( response => {
