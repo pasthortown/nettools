@@ -14,6 +14,12 @@ database_uri='mongodb://'+mongo_user+':'+mongo_password+'@'+ mongo_bdd_server +'
 client = MongoClient(database_uri)
 db = client[mongo_bdd]
 
+def db_clean_history():
+    collection = db['pings']
+    from_date = datetime.datetime.now() - datetime.timedelta(days=5)
+    query = {'timestamp': {'$lt': from_date}}
+    result = collection.delete_many(query)
+    
 def do_ping(target):
     collection = db['pings']
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -39,5 +45,6 @@ def do_pings():
             do_ping(target)
 
 while(True):
+    db_clean_history()
     do_pings()
     time.sleep(5)
